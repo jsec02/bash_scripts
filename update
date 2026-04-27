@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+
+# ================================================================================
+# =                                    UPDATE                                    =
+# ================================================================================
+
+set -euo pipefail
+
+NAME=${0##*/}
+
+CURL="curl --location --fail --retry 3 --retry-delay 2 --retry-all-errors"
+CURL_FILE="$CURL --output"
+
+usage() {
+    echo "Usage: $NAME [nvim|yazi] [-h|--help]"
+}
+
+determine_architecture() {
+    case "$HOSTNAME" in
+        pi)
+            ARCHITECTURE_NVIM=arm64
+            ARCHITECTURE_YAZI=aarch64
+            ;;
+        kali)
+            ARCHITECTURE_NVIM=x86_64
+            ARCHITECTURE_YAZI=x86_64
+            ;;
+        *)
+            echo "Unknown host: $HOSTNAME" >&2
+            exit 1
+            ;;
+    esac
+}
+
+remove_neovim() {
+    sudo rm --recursive --force "/opt/nvim-linux-${ARCHITECTURE_NVIM}"
+    sudo rm --force "/usr/local/bin/nvim" # Removes symlink
+}
+
+install_neovim() {
+    # Get latest neovim release, decompress, and extract
+    $CURL \
+        "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${ARCHITECTURE_NVIM}.tar.gz" \
+        | gzip --decompress --stdout \
+        | sudo tar --extract --file=- --directory=/opt
+
+    # Link binary to /usr/local/bin/nvim for PATH access
+    sudo ln --symbolic --force "/opt/nvim-linux-${ARCHITECTURE_NVIM}/bin/nvim" "/usr/local/bin/nvim"
+}
+
+install_yazi() {
+    local deb="/tmp/yazi-${ARCHITECTURE_YAZI}-unknown-linux-gnu.deb"
+
+    $CURL_FILE "$deb" \
+        "https://github.com/sxyazi/yazi/releases/latest/download/yazi-${ARCHITECTURE_YAZI}-unknown-linux-gnu.deb"
+
+    sudo apt install --yes "$deb"
+
+    rm "$deb"
+}
+
+main() {
+    if (($# == 0)); then
+        usage >&2
+        exit 1
+    fi
+
+    determine_architecture
+
+    while (($# > 0)); do
+        case "$1" in
+            nvim)
+                remove_neovim
+                install_neovim
+                ;;
+            yazi)
+                install_yazi
+                ;;
+            -h | --help)
+                usage
+                exit
+                ;;
+            *)
+                usage >&2
+                exit 1
+                ;;
+
+        esac
+        shift
+    done
+}
+
+main "$@"
