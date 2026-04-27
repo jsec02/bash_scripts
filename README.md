@@ -10,10 +10,10 @@ Bash based personal productivity tools and workflow automation
 --------------------------------------------------------------------------------
 Language                      files          blank        comment           code
 --------------------------------------------------------------------------------
-Bourne Again Shell                2             19             10             80
+Bourne Again Shell                3             34             16            135
 Markdown                          1              8              4             21
 --------------------------------------------------------------------------------
-SUM:                              3             27             14            101
+SUM:                              4             42             20            156
 --------------------------------------------------------------------------------
 ```
 <!-- CODE_STATISTICS_END -->
@@ -26,8 +26,9 @@ SUM:                              3             27             14            101
 bash_scripts
 ├── copy
 ├── getmusic
-└── README.md
+├── README.md
+└── update
 
-1 directory, 3 files
+1 directory, 4 files
 ```
 <!-- PROJECT_STRUCTURE_END -->
