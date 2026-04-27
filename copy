@@ -53,7 +53,7 @@ copy_files() {
     for source in "${SOURCES[@]}"; do
         for target in "${TARGETS[@]}"; do
             rsync --verbose --recursive --copy-links \
-                "${SOURCES_MAPPING[$source]}" \
+                "${SOURCES_MAPPING[$source]}/" \
                 "${target}:${SOURCES_MAPPING[$source]}"
         done
     done
