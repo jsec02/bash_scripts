@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+
+# ================================================================================
+# =                                     ADD                                      =
+# ================================================================================
+
+# Adds packages to a machines corresponding packages file for setup automation
+# Checks if package exists in repositories
+# Stages, commits, and pushes to GitHub
+
+set -eou pipefail
+
+NAME=${0##*/}
+
+MACHINE=""
+PACKAGES=()
+VALID_PACKAGES=()
+INVALID_PACKAGES=()
+
+usage() {
+    echo "Usage: $NAME [wsl|pi|kali] [packages...]"
+}
+
+parge_args() {
+    if (($# == 0)); then
+        usage >&2
+        exit 1
+    fi
+
+    case "$1" in
+        wsl | pi | kali) ;;
+        -h | --help)
+            usage
+            exit
+            ;;
+        *)
+            usage >&2
+            exit 1
+            ;;
+    esac
+    MACHINE="$1"
+    shift
+
+    PACKAGES=("$@")
+}
+
+check_connection() {
+    if ! ssh "$MACHINE" exit &>/dev/null; then
+        echo "$NAME: could not connect to $MACHINE" >&2
+        exit 1
+    fi
+}
+
+verify_packages() {
+    local query=() package
+
+    if [[ "$MACHINE" == "wsl" ]]; then
+        if command -v yay &>/dev/null; then
+            query=(yay -Si)
+        else
+            query=(pacman -Si)
+        fi
+    else
+        query=(apt show)
+    fi
+
+    for package in "${PACKAGES[@]}"; do
+        if ! ssh "$MACHINE" "${query[@]}" "$package" &>/dev/null; then
+            INVALID_PACKAGES+=("$package")
+            continue
+        fi
+        VALID_PACKAGES+=("$package")
+    done
+}
+
+invalid_packages() {
+    echo "Invalid packages: $(
+        joined=$(printf ', %s' "${INVALID_PACKAGES[@]}")
+        echo "${joined:2}"
+    )" >&2
+}
+
+packages_path() {
+    local name
+
+    if [[ "$MACHINE" == "wsl" ]]; then
+        name="yay"
+    else
+        name="apt"
+    fi
+
+    echo "$HOME/bash/setup/packages/$MACHINE/$name.txt"
+}
+
+add_packages() {
+    local name path package
+
+    if [[ "$MACHINE" == "wsl" ]]; then
+        name="yay"
+    else
+        name="apt"
+    fi
+
+    path=$(packages_path)
+
+    for package in "${VALID_PACKAGES[@]}"; do
+        echo "$package" >>"$path"
+    done
+
+    sort --output="$path" "$path"
+}
+
+sync_packages() {
+    local path
+
+    path=$(packages_path)
+
+    (cd "$HOME/bash/setup" \
+        && git add "$path" \
+        && git commit --message "chore: add packages" \
+        && git push)
+}
+
+main() {
+    parge_args "$@"
+
+    [[ $MACHINE != "wsl" ]] && check_connection
+
+    verify_packages
+
+    if ((${#VALID_PACKAGES[@]} == 0)); then
+        echo "No valid packages were provided" >&2
+        echo
+        echo "The following packages were not added"
+        invalid_packages
+        exit 1
+    fi
+
+    add_packages
+    sync_packages
+
+    echo "The following packages were added"
+    echo "Added packages: $(
+        joined=$(printf ', %s' "${VALID_PACKAGES[@]}")
+        echo "${joined:2}"
+    )"
+
+    if ((${#INVALID_PACKAGES[@]} > 0)); then
+        echo
+        echo "The following packages were not added"
+        invalid_packages
+        exit 1
+    fi
+}
+
+main "$@"
