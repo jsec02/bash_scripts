@@ -12,7 +12,8 @@ CURL="curl --location --fail --retry 3 --retry-delay 2 --retry-all-errors"
 CURL_FILE="$CURL --output"
 
 usage() {
-    echo "Usage: $NAME [nvim|yazi] [-h|--help]"
+    echo "Usage: $NAME <package>... [-h|--help]"
+    echo "packages: nvim yazi"
 }
 
 determine_architecture() {
