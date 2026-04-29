@@ -122,6 +122,11 @@ sync_packages() {
 }
 
 main() {
+    if [[ "$HOST" != "wsl" ]]; then
+        echo "This script should only be run on wsl" >&2
+        exit 1
+    fi
+
     parge_args "$@"
 
     [[ $MACHINE != "wsl" ]] && check_connection
