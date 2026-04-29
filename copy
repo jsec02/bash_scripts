@@ -13,12 +13,14 @@ declare -A SOURCES_MAPPING=(
     [zshrc]="$HOME/.zshrc"
     [zshenv]="$HOME/.zshenv"
     [zshenvlocal]="$HOME/.zshenv.local"
-    [nvim]="$HOME/.config/nvim"
-    [yazi]="$HOME/.config/yazi"
+    [nvim]="$HOME/.config/nvim/"
+    [yazi]="$HOME/.config/yazi/"
 )
 
 usage() {
-    echo "Usage: $NAME [zshrc|zshenv|zshenvlocal|nvim|yazi] [pi|kali] [-h|--help]"
+    echo "Usage: $NAME <source>... <target>... [-h|--help]"
+    echo "  sources: zshrc zshenv zshenvlocal nvim yazi"
+    echo "  targets: pi kali"
 }
 
 parse_args() {
@@ -53,7 +55,7 @@ copy_files() {
     for source in "${SOURCES[@]}"; do
         for target in "${TARGETS[@]}"; do
             rsync --verbose --recursive --copy-links \
-                "${SOURCES_MAPPING[$source]}/" \
+                "${SOURCES_MAPPING[$source]}" \
                 "${target}:${SOURCES_MAPPING[$source]}"
         done
     done
