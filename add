@@ -17,6 +17,13 @@ PACKAGES=()
 VALID_PACKAGES=()
 INVALID_PACKAGES=()
 
+require_wsl() {
+    if [[ "$HOSTNAME" != "wsl" ]]; then
+        echo "This script should only be run on wsl" >&2
+        exit 1
+    fi
+}
+
 usage() {
     echo "Usage: $NAME [wsl|pi|kali] [packages...]"
 }
@@ -117,10 +124,7 @@ sync_packages() {
 }
 
 main() {
-    if [[ "$HOSTNAME" != "wsl" ]]; then
-        echo "This script should only be run on wsl" >&2
-        exit 1
-    fi
+    require_wsl
 
     local joined
 

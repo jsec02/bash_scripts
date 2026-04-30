@@ -17,6 +17,13 @@ declare -A SOURCES_MAPPING=(
     [yazi]="$HOME/.config/yazi/"
 )
 
+require_wsl() {
+    if [[ "$HOSTNAME" != "wsl" ]]; then
+        echo "This script should only be run on wsl" >&2
+        exit 1
+    fi
+}
+
 usage() {
     echo "Usage: $NAME <source>... <target>... [-h|--help]"
     echo "  sources: zshrc zshenv zshenvlocal nvim yazi"
@@ -62,6 +69,7 @@ copy_files() {
 }
 
 main() {
+    require_wsl
     parse_args "$@"
     copy_files
 }

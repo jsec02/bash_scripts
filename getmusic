@@ -13,6 +13,13 @@ set -eou pipefail
 
 OUTPUT="$HOME/music"
 
+require_wsl() {
+    if [[ "$HOSTNAME" != "wsl" ]]; then
+        echo "This script should only be run on wsl" >&2
+        exit 1
+    fi
+}
+
 check_for_yt-dlp() {
     if ! command -v yt-dlp &>/dev/null; then
         echo "yt-dlp not found" >&2
@@ -39,6 +46,7 @@ copy_to_pi() {
 }
 
 main() {
+    require_wsl
     check_for_yt-dlp
     run_yt-dlp
     copy_to_pi
