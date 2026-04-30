@@ -52,7 +52,7 @@ grep_services() {
         exit 1
     fi
 
-    grep --extended-regexp "$PATTERN" "$services" \
+    grep --color=auto --extended-regexp "$PATTERN" "$services" \
         || echo "No ports found" >&2
 }
 
