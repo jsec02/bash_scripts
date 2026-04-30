@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+# ================================================================================
+# =                                     PORT                                     =
+# ================================================================================
+
+set -eou pipefail
+
+NAME=${0##*/}
+
+PORTS=()
+PATTERN=""
+
+usage() {
+    echo "Usage: $NAME [ports...]"
+}
+
+parse_args() {
+    if (($# == 0)); then
+        usage >&2
+        exit 1
+    fi
+
+    while (($# > 0)); do
+        PORTS+=("$1")
+        shift
+    done
+
+}
+
+build_pattern() {
+    local port
+    local patterns=()
+
+    for port in "${PORTS[@]}"; do
+        patterns+=("[[:space:]]$port/(tcp|udp)")
+    done
+
+    PATTERN=$(
+        IFS="|"
+        echo "${patterns[*]}"
+    )
+}
+
+grep_services() {
+    local services
+
+    services="/etc/services"
+
+    if ! [[ -e "$services" ]]; then
+        echo "Services file not found" >&2
+        exit 1
+    fi
+
+    grep --extended-regexp "$PATTERN" "$services" \
+        || echo "No ports found" >&2
+}
+
+main() {
+    parse_args "$@"
+    build_pattern
+    grep_services
+}
+
+main "$@"
