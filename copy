@@ -9,7 +9,9 @@ NAME=${0##*/}
 SOURCES=()
 TARGETS=()
 
-declare -A SOURCES_MAPPING=(
+declare -A SOURCES_MAPPING
+
+SOURCES_MAPPING=(
     [zshrc]="$HOME/.zshrc"
     [zshenv]="$HOME/.zshenv"
     [zshenvlocal]="$HOME/.zshenv.local"
