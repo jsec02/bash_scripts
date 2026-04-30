@@ -50,7 +50,7 @@ build_url() {
     esac
 
     url_mapping=(
-        [google]="https://archlinux.org/packages/?q=${QUERY[*]}"
+        [google]="https://www.google.com/search?q=${QUERY[*]}"
         [claude]="https://claude.ai/new?q=${QUERY[*]}"
         [github]="https://github.com/search?q=${QUERY[*]}&type=repositories"
         [pacman]="https://archlinux.org/packages/?q=${QUERY[*]}"
