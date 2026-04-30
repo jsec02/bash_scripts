@@ -15,6 +15,7 @@ SOURCES_MAPPING=(
     [zshrc]="$HOME/.zshrc"
     [zshenv]="$HOME/.zshenv"
     [zshenvlocal]="$HOME/.zshenv.local"
+    [ssh]="$HOME/.ssh/config"
     [nvim]="$HOME/.config/nvim/"
     [yazi]="$HOME/.config/yazi/"
 )
@@ -28,7 +29,7 @@ require_wsl() {
 
 usage() {
     echo "Usage: $NAME <source>... <target>... [-h|--help]"
-    echo "  sources: zshrc zshenv zshenvlocal nvim yazi"
+    echo "  sources: zshrc zshenv zshenvlocal ssh nvim yazi"
     echo "  targets: pi kali"
 }
 
