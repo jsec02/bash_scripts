@@ -78,7 +78,7 @@ open_browser() {
     if [[ $HOSTNAME == "wsl" ]]; then
         "$firefox" "$URL"
     else
-        ssh wsl "$firefox" "$URL"
+        ssh wsl "$firefox" "${URL@Q}"
     fi
 }
 
