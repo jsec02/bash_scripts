@@ -62,7 +62,7 @@ build_url() {
 }
 
 check_connection() {
-    [[ $HOST == "wsl" ]] && return
+    [[ $HOSTNAME == "wsl" ]] && return
 
     if ! ssh wsl exit &>/dev/null; then
         echo "$NAME: could not connect to wsl" >&2
@@ -75,7 +75,7 @@ open_browser() {
 
     firefox="/mnt/c/Program Files/Mozilla Firefox/firefox.exe"
 
-    if [[ $HOST == "wsl" ]]; then
+    if [[ $HOSTNAME == "wsl" ]]; then
         "$firefox" "$URL"
     else
         ssh wsl "$firefox" "$URL"
