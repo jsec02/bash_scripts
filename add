@@ -52,6 +52,8 @@ parse_args() {
 }
 
 check_connection() {
+    [[ $MACHINE == "wsl" ]] && return
+
     if ! ssh "$MACHINE" exit &>/dev/null; then
         echo "$NAME: could not connect to $MACHINE" >&2
         exit 1
@@ -133,7 +135,7 @@ main() {
 
     parse_args "$@"
 
-    [[ $MACHINE != "wsl" ]] && check_connection
+    check_connection
 
     verify_packages
 
