@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+# ================================================================================
+# =                                    QUERY                                     =
+# ================================================================================
+
+NAME=${0##*/}
+
+SOURCE=""
+QUERY=()
+URL=""
+
+usage() {
+    echo "Usage: $NAME [source] [query]"
+    echo "  sources: google claude github pacman aur pypi"
+}
+
+parse_args() {
+    if (($# == 0)); then
+        usage >&2
+        exit 1
+    fi
+
+    case "$1" in
+        google | claude | github | pacman | aur | pypi) ;;
+        -h | --help)
+            usage
+            exit
+            ;;
+        *)
+            usage >&2
+            exit 1
+            ;;
+    esac
+    SOURCE="$1"
+    shift
+
+    while (($# > 0)); do
+        QUERY+=("$1")
+        shift
+    done
+}
+
+build_url() {
+    declare -A url_mapping
+
+    case "$SOURCE" in
+        google | claude | github) local IFS="+" ;;
+        pacman | aur | pypi) local IFS=" " ;;
+    esac
+
+    url_mapping=(
+        [google]="https://archlinux.org/packages/?q=${QUERY[*]}"
+        [claude]="https://claude.ai/new?q=${QUERY[*]}"
+        [github]="https://github.com/search?q=${QUERY[*]}&type=repositories"
+        [pacman]="https://archlinux.org/packages/?q=${QUERY[*]}"
+        [aur]="https://aur.archlinux.org/packages/?K=${QUERY[*]}"
+        [pypi]="https://pypi.org/search/?q=${QUERY[*]}"
+    )
+
+    URL="${url_mapping[$SOURCE]}"
+}
+
+check_connection() {
+    [[ $HOST == "wsl" ]] && return
+
+    if ! ssh "$MACHINE" exit &>/dev/null; then
+        echo "$NAME: could not connect to $MACHINE" >&2
+        exit 1
+    fi
+}
+
+open_browser() {
+    local firefox
+
+    firefox="/mnt/c/Program Files/Mozilla Firefox/firefox.exe"
+
+    if [[ $HOST == "wsl" ]]; then
+        "$firefox" "$URL"
+    else
+        ssh wsl "$firefox" "$URL"
+    fi
+}
+
+main() {
+    parse_args "$@"
+    build_url
+    check_connection
+    open_browser
+}
+
+main "$@"
