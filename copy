@@ -41,7 +41,7 @@ parse_args() {
 
     while (($# > 0)); do
         case "$1" in
-            zshrc | zshenv | zshenvlocal | nvim | yazi)
+            zshrc | zshenv | zshenvlocal | ssh | nvim | yazi)
                 SOURCES+=("$1")
                 ;;
             pi | kali)
