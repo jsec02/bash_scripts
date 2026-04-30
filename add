@@ -59,7 +59,8 @@ check_connection() {
 }
 
 verify_packages() {
-    local query=() package
+    local query=()
+    local package
 
     if [[ "$MACHINE" == "wsl" ]]; then
         if command -v yay &>/dev/null; then
@@ -81,9 +82,10 @@ verify_packages() {
 }
 
 print_invalid_packages() {
+    local joined
+
     echo >&2
     echo "The following packages were not added" >&2
-    local joined
     joined=$(printf ', %s' "${INVALID_PACKAGES[@]}")
     echo "Invalid packages: ${joined:2}" >&2
 }
@@ -101,7 +103,8 @@ packages_path() {
 }
 
 add_packages() {
-    local path package
+    local path
+    local package
 
     path=$(packages_path)
 

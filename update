@@ -50,7 +50,9 @@ install_neovim() {
 }
 
 install_yazi() {
-    local deb="/tmp/yazi-${ARCHITECTURE_YAZI}-unknown-linux-gnu.deb"
+    local deb
+
+    deb="/tmp/yazi-${ARCHITECTURE_YAZI}-unknown-linux-gnu.deb"
 
     $CURL_FILE "$deb" \
         "https://github.com/sxyazi/yazi/releases/latest/download/yazi-${ARCHITECTURE_YAZI}-unknown-linux-gnu.deb"

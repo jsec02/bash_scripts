@@ -58,7 +58,9 @@ parse_args() {
 }
 
 copy_files() {
-    local source target
+    local source
+    local target
+
     for source in "${SOURCES[@]}"; do
         for target in "${TARGETS[@]}"; do
             rsync --verbose --recursive --copy-links \
