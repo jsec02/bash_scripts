@@ -64,8 +64,8 @@ build_url() {
 check_connection() {
     [[ $HOST == "wsl" ]] && return
 
-    if ! ssh "$MACHINE" exit &>/dev/null; then
-        echo "$NAME: could not connect to $MACHINE" >&2
+    if ! ssh "wsl" exit &>/dev/null; then
+        echo "$NAME: could not connect to wsl" >&2
         exit 1
     fi
 }
