@@ -93,15 +93,15 @@ verify_packages() {
 }
 
 packages_path() {
-    local name
+    local package_manager
 
     if [[ "$MACHINE" == "wsl" ]]; then
-        name="yay"
+        package_manager="yay"
     else
-        name="apt"
+        package_manager="apt"
     fi
 
-    echo "$HOME/bash/setup/packages/$MACHINE/$name.txt"
+    echo "$HOME/packages/$MACHINE/$package_manager.txt"
 }
 
 add_packages() {
@@ -122,7 +122,7 @@ sync_packages() {
 
     path=$(packages_path)
 
-    if (cd "$HOME/bash/setup" \
+    if (cd "$HOME/packages" \
         && git add "$path" \
         && git commit --message "chore: add ${1:2}" \
         && git push) &>/dev/null; then
