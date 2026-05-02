@@ -124,7 +124,7 @@ sync_packages() {
 
     (cd "$HOME/bash/setup" \
         && git add "$path" \
-        && git commit --message "chore: add packages" \
+        && git commit --message "chore: add ${1:2}" \
         && git push)
 }
 
@@ -146,10 +146,12 @@ main() {
     fi
 
     add_packages
-    sync_packages
+
+    joined=$(printf ', %s' "${VALID_PACKAGES[@]}")
+
+    sync_packages "$joined"
 
     echo "The following packages were added"
-    joined=$(printf ', %s' "${VALID_PACKAGES[@]}")
     echo "Added packages: ${joined:2}"
 
     if ((${#INVALID_PACKAGES[@]} > 0)); then
