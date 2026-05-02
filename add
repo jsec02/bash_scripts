@@ -135,6 +135,10 @@ sync_packages() {
 main() {
     require_wsl
 
+    local MACHINE
+    local VALID_PACKAGES=()
+    local INVALID_PACKAGES=()
+
     local joined_valid
     local joined_invalid
 
