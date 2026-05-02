@@ -45,9 +45,11 @@ build_pattern() {
 grep_services() {
     local services
 
-    services="/etc/services"
-
-    if ! [[ -e "$services" ]]; then
+    if [[ -e "/usr/share/nmap/nmap-services" ]]; then
+        services="/usr/share/nmap/nmap-services"
+    elif [[ -e "/etc/services" ]]; then
+        services="/etc/services"
+    else
         echo "Services file not found" >&2
         exit 1
     fi
