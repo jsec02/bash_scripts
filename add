@@ -12,10 +12,8 @@ set -eou pipefail
 
 NAME=${0##*/}
 
-MACHINE=""
 PACKAGES=()
-VALID_PACKAGES=()
-INVALID_PACKAGES=()
+TARGETS=()
 
 require_wsl() {
     if [[ "$HOSTNAME" != "wsl" ]]; then
@@ -25,7 +23,8 @@ require_wsl() {
 }
 
 usage() {
-    echo "Usage: $NAME [wsl|pi|kali] [packages...]"
+    echo "Usage: $NAME <package>... <target>... [-h|--help]"
+    echo "  targets: wsl pi kali"
 }
 
 parse_args() {
@@ -34,28 +33,38 @@ parse_args() {
         exit 1
     fi
 
-    case "$1" in
-        wsl | pi | kali) ;;
-        -h | --help)
-            usage
-            exit
-            ;;
-        *)
-            usage >&2
-            exit 1
-            ;;
-    esac
-    MACHINE="$1"
-    shift
+    while (($# > 0)); do
+        case "$1" in
+            wsl | pi | kali)
+                TARGETS+=("$1")
+                ;;
+            -h | --help)
+                usage
+                exit
+                ;;
+            *)
+                PACKAGES+=("$1")
+                ;;
+        esac
+        shift
+    done
 
-    PACKAGES=("$@")
+    if ((${#TARGETS[@]} == 0)); then
+        echo "No targets were provided" >&2
+        exit 1
+    fi
+
+    if ((${#PACKAGES[@]} == 0)); then
+        echo "No packages were provided" >&2
+        exit 1
+    fi
 }
 
 check_connection() {
     [[ $MACHINE == "wsl" ]] && return
 
     if ! ssh "$MACHINE" exit &>/dev/null; then
-        echo "$NAME: could not connect to $MACHINE" >&2
+        echo "Could not connect to $MACHINE" >&2
         exit 1
     fi
 }
@@ -81,15 +90,6 @@ verify_packages() {
             INVALID_PACKAGES+=("$package")
         fi
     done
-}
-
-print_invalid_packages() {
-    local joined
-
-    echo >&2
-    echo "The following packages were not added" >&2
-    joined=$(printf ', %s' "${INVALID_PACKAGES[@]}")
-    echo "Invalid packages: ${joined:2}" >&2
 }
 
 packages_path() {
@@ -122,42 +122,53 @@ sync_packages() {
 
     path=$(packages_path)
 
-    (cd "$HOME/bash/setup" \
+    if (cd "$HOME/bash/setup" \
         && git add "$path" \
         && git commit --message "chore: add ${1:2}" \
-        && git push)
+        && git push) &>/dev/null; then
+        echo "Synced $MACHINE"
+    else
+        echo "Sync failed for $MACHINE" >&2
+    fi
 }
 
 main() {
     require_wsl
 
-    local joined
+    local joined_valid
+    local joined_invalid
 
     parse_args "$@"
 
-    check_connection
+    for target in "${TARGETS[@]}"; do
+        MACHINE="$target"
 
-    verify_packages
+        VALID_PACKAGES=()
+        INVALID_PACKAGES=()
 
-    if ((${#VALID_PACKAGES[@]} == 0)); then
-        echo "No valid packages were provided" >&2
-        print_invalid_packages
-        exit 1
-    fi
+        check_connection
 
-    add_packages
+        verify_packages
 
-    joined=$(printf ', %s' "${VALID_PACKAGES[@]}")
+        joined_valid=$(printf ', %s' "${VALID_PACKAGES[@]}")
+        joined_invalid=$(printf ', %s' "${INVALID_PACKAGES[@]}")
 
-    sync_packages "$joined"
+        if ((${#VALID_PACKAGES[@]} == 0)); then
+            echo "Invalid packages for $MACHINE: ${joined_invalid:2}" >&2
+            continue
+        fi
 
-    echo "The following packages were added"
-    echo "Added packages: ${joined:2}"
+        add_packages
 
-    if ((${#INVALID_PACKAGES[@]} > 0)); then
-        print_invalid_packages
-        exit 1
-    fi
+        sync_packages "$joined_valid"
+
+        echo "Added packages to $MACHINE: ${joined_valid:2}"
+
+        if ((${#INVALID_PACKAGES[@]} > 0)); then
+            echo "Invalid packages for $MACHINE: ${joined_invalid:2}" >&2
+        fi
+    done
+
 }
 
 main "$@"
