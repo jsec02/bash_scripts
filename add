@@ -12,8 +12,13 @@ set -eou pipefail
 
 NAME=${0##*/}
 
+MACHINE=""
+
+PACKAGE_MANAGER=""
+
 PACKAGES=()
-TARGETS=()
+VALID_PACKAGES=()
+INVALID_PACKAGES=()
 
 require_wsl() {
     if [[ "$HOSTNAME" != "wsl" ]]; then
@@ -23,8 +28,8 @@ require_wsl() {
 }
 
 usage() {
-    echo "Usage: $NAME <package>... <target>... [-h|--help]"
-    echo "  targets: wsl pi kali"
+    echo "Usage: $NAME <package>... <machine> [-h|--help]"
+    echo "  machines: wsl pi kali"
 }
 
 parse_args() {
@@ -36,7 +41,10 @@ parse_args() {
     while (($# > 0)); do
         case "$1" in
             wsl | pi | kali)
-                TARGETS+=("$1")
+                MACHINE="$1"
+                ;;
+            yay | apt | pip)
+                PACKAGE_MANAGER="$1"
                 ;;
             -h | --help)
                 usage
@@ -49,8 +57,13 @@ parse_args() {
         shift
     done
 
-    if ((${#TARGETS[@]} == 0)); then
-        echo "No targets were provided" >&2
+    if [[ -z "$MACHINE" ]]; then
+        echo "No machine was provided" >&2
+        exit 1
+    fi
+
+    if [[ -z "$PACKAGE_MANAGER" ]]; then
+        echo "No package manager was provided" >&2
         exit 1
     fi
 
@@ -69,22 +82,41 @@ check_connection() {
     fi
 }
 
+validate_package_manager() {
+    local path
+
+    path=$(packages_path)
+
+    if [[ ! -f "$path" ]]; then
+        echo "No $PACKAGE_MANAGER.txt file found for $MACHINE" >&2
+        exit 1
+    fi
+}
+
 verify_packages() {
     local query=()
     local package
 
-    if [[ "$MACHINE" == "wsl" ]]; then
-        if command -v yay &>/dev/null; then
+    case $PACKAGE_MANAGER in
+        yay)
             query=(yay -Si)
-        else
-            query=(pacman -Si)
-        fi
+            ;;
+        apt)
+            query=(apt show)
+            ;;
+        pip)
+            query=(pip show)
+            ;;
+    esac
+
+    if [[ "$MACHINE" == "wsl" ]]; then
+        ssh=()
     else
-        query=(ssh "$MACHINE" apt show)
+        ssh=(ssh "$MACHINE")
     fi
 
     for package in "${PACKAGES[@]}"; do
-        if "${query[@]}" "$package" &>/dev/null; then
+        if "${ssh[@]}" "${query[@]}" "$package" &>/dev/null; then
             VALID_PACKAGES+=("$package")
         else
             INVALID_PACKAGES+=("$package")
@@ -93,15 +125,7 @@ verify_packages() {
 }
 
 packages_path() {
-    local package_manager
-
-    if [[ "$MACHINE" == "wsl" ]]; then
-        package_manager="yay"
-    else
-        package_manager="apt"
-    fi
-
-    echo "$HOME/packages/$MACHINE/$package_manager.txt"
+    echo "$HOME/packages/$MACHINE/$PACKAGE_MANAGER.txt"
 }
 
 add_packages() {
@@ -135,43 +159,37 @@ sync_packages() {
 main() {
     require_wsl
 
-    local MACHINE
-    local VALID_PACKAGES=()
-    local INVALID_PACKAGES=()
-
+    local path
     local joined_valid
     local joined_invalid
 
     parse_args "$@"
 
-    for target in "${TARGETS[@]}"; do
-        MACHINE="$target"
+    path=$(packages_path)
 
-        VALID_PACKAGES=()
-        INVALID_PACKAGES=()
+    check_connection
 
-        check_connection
+    validate_package_manager
 
-        verify_packages
+    verify_packages
 
-        joined_valid=$(printf ', %s' "${VALID_PACKAGES[@]}")
-        joined_invalid=$(printf ', %s' "${INVALID_PACKAGES[@]}")
+    joined_valid=$(printf ', %s' "${VALID_PACKAGES[@]}")
+    joined_invalid=$(printf ', %s' "${INVALID_PACKAGES[@]}")
 
-        if ((${#VALID_PACKAGES[@]} == 0)); then
-            echo "Invalid packages for $MACHINE: ${joined_invalid:2}" >&2
-            continue
-        fi
+    if ((${#VALID_PACKAGES[@]} == 0)); then
+        echo "Invalid packages for $path: ${joined_invalid:2}" >&2
+        exit 1
+    fi
 
-        add_packages
+    add_packages
 
-        sync_packages "$joined_valid"
+    sync_packages "$joined_valid"
 
-        echo "Added packages to $MACHINE: ${joined_valid:2}"
+    echo "Added packages to $path: ${joined_valid:2}"
 
-        if ((${#INVALID_PACKAGES[@]} > 0)); then
-            echo "Invalid packages for $MACHINE: ${joined_invalid:2}" >&2
-        fi
-    done
+    if ((${#INVALID_PACKAGES[@]} > 0)); then
+        echo "Invalid packages for $path: ${joined_invalid:2}" >&2
+    fi
 
 }
 
