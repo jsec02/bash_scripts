@@ -13,7 +13,7 @@ CURL_FILE="$CURL --output"
 
 usage() {
     echo "Usage: $NAME <package>... [-h|--help]"
-    echo "packages: nvim yazi"
+    echo "packages: nvim yazi zellij"
 }
 
 determine_architecture() {
@@ -21,10 +21,12 @@ determine_architecture() {
         pi)
             ARCHITECTURE_NVIM=arm64
             ARCHITECTURE_YAZI=aarch64
+            ARCHITECTURE_ZELLIJ=aarch64
             ;;
         kali)
             ARCHITECTURE_NVIM=x86_64
             ARCHITECTURE_YAZI=x86_64
+            ARCHITECTURE_ZELLIJ=x86_64
             ;;
         *)
             echo "Unknown host: $HOSTNAME" >&2
@@ -62,6 +64,17 @@ install_yazi() {
     rm "$deb"
 }
 
+remove_zellij() {
+    sudo rm --force "/usr/local/bin/zellij"
+}
+
+install_zellij() {
+    $CURL \
+        "https://github.com/zellij-org/zellij/releases/latest/download/zellij-${ARCHITECTURE_ZELLIJ}-unknown-linux-musl.tar.gz" \
+        | gzip --decompress --stdout \
+        | sudo tar --extract --file=- --directory=/usr/local/bin
+}
+
 main() {
     if (($# == 0)); then
         usage >&2
@@ -78,6 +91,10 @@ main() {
                 ;;
             yazi)
                 install_yazi
+                ;;
+            zellij)
+                remove_zellij
+                install_zellij
                 ;;
             -h | --help)
                 usage
