@@ -183,9 +183,9 @@ main() {
 
     add_packages
 
-    sync_packages "$joined_valid"
-
     echo "Added packages to $path: ${joined_valid:2}"
+
+    sync_packages "$joined_valid"
 
     if ((${#INVALID_PACKAGES[@]} > 0)); then
         echo "Invalid packages for $path: ${joined_invalid:2}" >&2
