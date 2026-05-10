@@ -12,7 +12,7 @@ URL=""
 
 usage() {
     echo "Usage: $NAME [source] [query]"
-    echo "  sources: google claude github pacman aur pypi"
+    echo "  sources: google claude github pacman aur pypi amazon youtube"
 }
 
 parse_args() {
@@ -22,7 +22,7 @@ parse_args() {
     fi
 
     case "$1" in
-        google | claude | github | pacman | aur | pypi | amazon) ;;
+        google | claude | github | pacman | aur | pypi | amazon | youtube) ;;
         -h | --help)
             usage
             exit
@@ -45,7 +45,7 @@ build_url() {
     declare -A url_mapping
 
     case "$SOURCE" in
-        google | claude | github | amazon) local IFS="+" ;;
+        google | claude | github | amazon | youtube) local IFS="+" ;;
         pacman | aur | pypi) local IFS=" " ;;
     esac
 
@@ -57,6 +57,7 @@ build_url() {
         [aur]="https://aur.archlinux.org/packages/?K=${QUERY[*]}"
         [pypi]="https://pypi.org/search/?q=${QUERY[*]}"
         [amazon]="https://www.amazon.ca/s?k=${QUERY[*]}"
+        [youtube]="https://www.youtube.com/results?search_query=${QUERY[*]}"
     )
 
     URL="${url_mapping[$SOURCE]}"
