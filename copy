@@ -21,7 +21,7 @@ SOURCES_MAPPING=(
     [yazi]="$HOME/.config/yazi/"
     [fzf]="$HOME/.config/fzf/"
     [zellij]="$HOME/.config/zellij/"
-    [atuin]="$HOME/.config/atuin/"
+    [atuin]="$HOME/dotfiles/atuin/"
 )
 
 require_wsl() {
