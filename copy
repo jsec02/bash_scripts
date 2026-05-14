@@ -21,6 +21,7 @@ SOURCES_MAPPING=(
     [yazi]="$HOME/.config/yazi/"
     [fzf]="$HOME/.config/fzf/"
     [zellij]="$HOME/.config/zellij/"
+    [atuin]="$HOME/.config/atuin/"
 )
 
 require_wsl() {
@@ -32,7 +33,7 @@ require_wsl() {
 
 usage() {
     echo "Usage: $NAME <source>... <target>... [-h|--help]"
-    echo "  sources: zshrc zshenv zshenvlocal zprofile ssh nvim yazi fzf zellij"
+    echo "  sources: zshrc zshenv zshenvlocal zprofile ssh nvim yazi fzf zellij atuin"
     echo "  targets: pi kali"
 }
 
@@ -44,7 +45,7 @@ parse_args() {
 
     while (($# > 0)); do
         case "$1" in
-            zshrc | zshenv | zshenvlocal | zprofile | ssh | nvim | yazi | fzf | zellij)
+            zshrc | zshenv | zshenvlocal | zprofile | ssh | nvim | yazi | fzf | zellij | atuin)
                 SOURCES+=("$1")
                 ;;
             pi | kali)
