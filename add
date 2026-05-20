@@ -43,7 +43,7 @@ parse_args() {
             wsl | pi | kali)
                 MACHINE="$1"
                 ;;
-            yay | apt | pip)
+            yay | apt | pip2 | pip3)
                 PACKAGE_MANAGER="$1"
                 ;;
             -h | --help)
@@ -82,6 +82,10 @@ check_connection() {
     fi
 }
 
+packages_path() {
+    echo "$HOME/packages/$MACHINE/$PACKAGE_MANAGER.txt"
+}
+
 validate_package_manager() {
     local path
 
@@ -104,8 +108,11 @@ verify_packages() {
         apt)
             query=(apt show)
             ;;
-        pip)
-            query=(pip show)
+        pip2)
+            query=(pip2 show)
+            ;;
+        pip3)
+            query=(pip3 show)
             ;;
     esac
 
@@ -122,10 +129,6 @@ verify_packages() {
             INVALID_PACKAGES+=("$package")
         fi
     done
-}
-
-packages_path() {
-    echo "$HOME/packages/$MACHINE/$PACKAGE_MANAGER.txt"
 }
 
 add_packages() {
