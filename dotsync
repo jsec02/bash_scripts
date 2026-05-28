@@ -9,7 +9,7 @@ MACHINES=(wsl pi kali)
 sync() {
     for machine in "${MACHINES[@]}"; do
         [[ "$machine" == "$HOSTNAME" ]] && continue
-        ssh "$machine" "cd ~/dotfiles && git pull origin master && cd ~/bash/scripts && git pull origin master && bash mksym"
+        ssh "$machine" 'cd $HOME/dotfiles && git pull origin master && cd $HOME/bash/scripts && git pull origin master && bash mksym'
     done
 }
 
