@@ -12,6 +12,7 @@ SYMLINK_MAPPING=(
     [$HOME/dotfiles/fzf]="$HOME/.config/fzf"
     [$HOME/dotfiles/git/.gitconfig]="$HOME/.gitconfig"
     [$HOME/dotfiles/helix]="$HOME/.config/helix"
+    [$HOME/dotfiles/homepage]="$HOME/.config/homepage"
     [$HOME/dotfiles/kak]="$HOME/.config/kak"
     [$HOME/dotfiles/nvim]="$HOME/.config/nvim"
     [$HOME/dotfiles/sqlite/.sqliterc]="$HOME/.config/nvim"
