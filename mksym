@@ -15,6 +15,7 @@ SYMLINK_MAPPING=(
     [$HOME/dotfiles/homepage]="$HOME/.config/homepage"
     [$HOME/dotfiles/kak]="$HOME/.config/kak"
     [$HOME/dotfiles/nvim]="$HOME/.config/nvim"
+    [$HOME/dotfiles/redshift]="$HOME/.config/redshift"
     [$HOME/dotfiles/sqlite/.sqliterc]="$HOME/.config/nvim"
     [$HOME/dotfiles/ssh/config]="$HOME/.sqliterc"
     [$HOME/dotfiles/yazi]="$HOME/.config/yazi"
