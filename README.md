@@ -10,10 +10,10 @@ Bash based personal productivity tools and workflow automation
 --------------------------------------------------------------------------------
 Language                      files          blank        comment           code
 --------------------------------------------------------------------------------
-Bourne Again Shell                6            118             27            424
+Bourne Again Shell                7            123             30            437
 Markdown                          1              8              4             25
 --------------------------------------------------------------------------------
-SUM:                              7            126             31            449
+SUM:                              8            131             34            462
 --------------------------------------------------------------------------------
 ```
 <!-- CODE_STATISTICS_END -->
@@ -25,6 +25,7 @@ SUM:                              7            126             31            449
 ```
 bash_scripts
 ├── add
+├── dotsync
 ├── getmusic
 ├── mksym
 ├── port
@@ -32,6 +33,6 @@ bash_scripts
 ├── README.md
 └── update
 
-1 directory, 7 files
+1 directory, 8 files
 ```
 <!-- PROJECT_STRUCTURE_END -->

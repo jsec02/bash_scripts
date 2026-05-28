@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# ================================================================================
+# =                                   DOTSYNC                                    =
+# ================================================================================
+
+MACHINES=(wsl pi kali)
+
+sync() {
+    for machine in "${MACHINES[@]}"; do
+        [[ "$machine" == "$HOSTNAME" ]] && continue
+        ssh "$machine" "cd ~/dotfiles && git pull origin master && cd ~/bash/scripts && git pull origin master && bash mksym"
+    done
+}
+
+main() {
+    sync
+}
+
+main
