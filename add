@@ -4,7 +4,7 @@
 # =                                     ADD                                      =
 # ================================================================================
 
-# Adds packages to a machines corresponding packages file for setup automation
+# Adds packages to inventory.yaml file for setup automation
 # Checks if package exists in repositories
 # Stages, commits, and pushes to GitHub
 
@@ -82,17 +82,12 @@ check_connection() {
     fi
 }
 
-packages_path() {
-    echo "$HOME/packages/$MACHINE/$PACKAGE_MANAGER.txt"
-}
-
 validate_package_manager() {
-    local path
+    local valid
+    valid=$(python "$HOME/inventory/parser.py" package_managers "$MACHINE")
 
-    path=$(packages_path)
-
-    if [[ ! -f "$path" ]]; then
-        echo "No $PACKAGE_MANAGER.txt file found for $MACHINE" >&2
+    if ! echo "${valid}" | grep --quiet --word-regexp "${PACKAGE_MANAGER}"; then
+        echo "Invalid package manager for $MACHINE" >&2
         exit 1
     fi
 }
@@ -132,25 +127,18 @@ verify_packages() {
 }
 
 add_packages() {
-    local path
     local package
 
-    path=$(packages_path)
-
     for package in "${VALID_PACKAGES[@]}"; do
-        echo "$package" >>"$path"
+        yq --in-place --yaml-output \
+            ".machines.${MACHINE}.package_managers.${PACKAGE_MANAGER} += [\"${package}\"]" \
+            "$HOME/inventory/inventory.yaml"
     done
-
-    sort --output="$path" "$path"
 }
 
-sync_packages() {
-    local path
-
-    path=$(packages_path)
-
-    if (cd "$HOME/packages" \
-        && git add "$path" \
+sync_inventory() {
+    if (cd "$HOME/inventory" \
+        && git add "inventory.yaml" \
         && git commit --message "chore: add ${1:2}" \
         && git push) &>/dev/null; then
         echo "Synced $MACHINE"
@@ -162,13 +150,10 @@ sync_packages() {
 main() {
     require_wsl
 
-    local path
     local joined_valid
     local joined_invalid
 
     parse_args "$@"
-
-    path=$(packages_path)
 
     check_connection
 
@@ -180,18 +165,18 @@ main() {
     joined_invalid=$(printf ', %s' "${INVALID_PACKAGES[@]}")
 
     if ((${#VALID_PACKAGES[@]} == 0)); then
-        echo "Invalid packages for $path: ${joined_invalid:2}" >&2
+        echo "Invalid packages for ${MACHINE} ${PACKAGE_MANAGER}: ${joined_invalid:2}" >&2
         exit 1
     fi
 
     add_packages
 
-    echo "Added packages to $path: ${joined_valid:2}"
+    echo "Added packages to ${MACHINE} ${PACKAGE_MANAGER}: ${joined_valid:2}"
 
-    sync_packages "$joined_valid"
+    sync_inventory "$joined_valid"
 
     if ((${#INVALID_PACKAGES[@]} > 0)); then
-        echo "Invalid packages for $path: ${joined_invalid:2}" >&2
+        echo "Invalid packages for ${MACHINE} ${PACKAGE_MANAGER}: ${joined_invalid:2}" >&2
     fi
 
 }
