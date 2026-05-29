@@ -20,16 +20,23 @@ PACKAGES=()
 VALID_PACKAGES=()
 INVALID_PACKAGES=()
 
+usage() {
+    echo "Usage: $NAME <package>... <machine> [-h|--help]"
+    echo "  machines: wsl pi kali"
+}
+
+check_for_yq() {
+    if ! command -v yq &>/dev/null; then
+        echo "yq not found" >&2
+        exit 1
+    fi
+}
+
 require_wsl() {
     if [[ "$HOSTNAME" != "wsl" ]]; then
         echo "This script should only be run on wsl" >&2
         exit 1
     fi
-}
-
-usage() {
-    echo "Usage: $NAME <package>... <machine> [-h|--help]"
-    echo "  machines: wsl pi kali"
 }
 
 parse_args() {
@@ -149,6 +156,8 @@ sync_inventory() {
 
 main() {
     require_wsl
+
+    check_for_yq
 
     local joined_valid
     local joined_invalid
