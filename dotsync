@@ -4,7 +4,7 @@
 # =                                   DOTSYNC                                    =
 # ================================================================================
 
-MACHINES=(wsl pi kali)
+read -ra MACHINES <<<"$(python "$HOME/inventory/parser.py" machines)"
 
 sync() {
     for machine in "${MACHINES[@]}"; do
