@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
 
 # ================================================================================
-# =                                   DOTSYNC                                    =
+# =                                   INVSYNC                                    =
 # ================================================================================
 
 read -ra MACHINES <<<"$(python "$HOME/inventory/parser.py" machines)"
 
-sync() {
+sync_inventory() {
+    for machine in "${MACHINES[@]}"; do
+        [[ "$machine" == "$HOSTNAME" ]] && continue
+        ssh "$machine" 'cd $HOME/inventory && git pull origin master'
+    done
+}
+
+sync_dotfiles() {
     for machine in "${MACHINES[@]}"; do
         [[ "$machine" == "$HOSTNAME" ]] && continue
         ssh "$machine" 'cd $HOME/dotfiles && git pull origin master && cd $HOME/bash/scripts && git pull origin master && bash mksym'
@@ -14,7 +21,8 @@ sync() {
 }
 
 main() {
-    sync
+    sync_inventory
+    sync_dotfiles
 }
 
 main
