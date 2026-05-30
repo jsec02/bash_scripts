@@ -101,6 +101,7 @@ validate_package_manager() {
 
 verify_packages() {
     local query=()
+    local ssh=()
     local package
 
     case $PACKAGE_MANAGER in
@@ -118,9 +119,7 @@ verify_packages() {
             ;;
     esac
 
-    if [[ "$MACHINE" == "wsl" ]]; then
-        ssh=()
-    else
+    if ! [[ "$MACHINE" == "wsl" ]]; then
         ssh=(ssh "$MACHINE")
     fi
 
