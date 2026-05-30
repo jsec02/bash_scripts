@@ -5,10 +5,12 @@
 # ================================================================================
 
 create_symlinks() {
-    while read -r source target; do
-        [[ -e $target ]] && rm --recursive --force "$target"
-        mkdir --parents "$(dirname "$target")"
-        ln --symbolic --force "$source" "$target"
+    while read -r source target sudo; do
+        local cmd=()
+        [[ "$sudo" == "true" ]] && cmd=(sudo)
+        [[ -e $target ]] && "${cmd[@]}" rm --recursive --force "$target"
+        "${cmd[@]}" mkdir --parents "$(dirname "$target")"
+        "${cmd[@]}" ln --symbolic --force "$source" "$target"
     done < <(python "$HOME/inventory/parser.py" links "$HOSTNAME")
 }
 
