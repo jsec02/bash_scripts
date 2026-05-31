@@ -4,7 +4,7 @@
 # =                                   INVSYNC                                    =
 # ================================================================================
 
-read -ra MACHINES <<<"$(python "$HOME/inventory/parser.py" machines)"
+read -ra MACHINES <<<"$(python3 "$HOME/inventory/parser.py" machines)"
 
 sync_inventory() {
     for machine in "${MACHINES[@]}"; do

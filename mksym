@@ -7,13 +7,13 @@
 mksym() {
     while read -r source target sudo; do
         local cmd=()
-        [[ -L "$target" ]] && continue                        # skip if symlink already exists
+        [[ -L "$target" ]] && continue # skip if symlink already exists
         [[ "$sudo" == "true" ]] && cmd=(sudo)
         mkdir --parents "$(dirname "$source")"                # ensure dotfiles destination dir exists
         "${cmd[@]}" mv "$target" "$source"                    # move existing config into dotfiles
         "${cmd[@]}" mkdir --parents "$(dirname "$target")"    # ensure target parent dir exists
         "${cmd[@]}" ln --symbolic --force "$source" "$target" # create symlink from dotfiles to target
-    done < <(python "$HOME/inventory/parser.py" links "$HOSTNAME")
+    done < <(python3 "$HOME/inventory/parser.py" links "$HOSTNAME")
 }
 
 main() {
