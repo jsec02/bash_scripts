@@ -91,7 +91,7 @@ check_connection() {
 
 validate_package_manager() {
     local valid
-    valid=$(python "$HOME/inventory/parser.py" package_managers "$MACHINE")
+    valid=$(python3 "$HOME/inventory/parser.py" package_managers "$MACHINE")
 
     if ! echo "${valid}" | grep --quiet --word-regexp "${PACKAGE_MANAGER}"; then
         echo "Invalid package manager for $MACHINE" >&2
