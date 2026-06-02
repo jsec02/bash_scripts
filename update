@@ -19,11 +19,13 @@ usage() {
 determine_architecture() {
     case "$HOSTNAME" in
         pi)
+            ARCHITECTURE_ATUIN=aarch64
             ARCHITECTURE_NVIM=arm64
             ARCHITECTURE_YAZI=aarch64
             ARCHITECTURE_ZELLIJ=aarch64
             ;;
         kali)
+            ARCHITECTURE_ATUIN=x86_64
             ARCHITECTURE_NVIM=x86_64
             ARCHITECTURE_YAZI=x86_64
             ARCHITECTURE_ZELLIJ=x86_64
@@ -33,6 +35,17 @@ determine_architecture() {
             exit 1
             ;;
     esac
+}
+
+remove_atuin() {
+    sudo rm --force "/usr/local/bin/atuin"
+}
+
+install_atuin() {
+    $CURL \
+        "https://github.com/atuinsh/atuin/releases/latest/download/atuin-${ARCHITECTURE_ATUIN}-unknown-linux-gnu.tar.gz" \
+        | gzip --decompress --stdout \
+        | sudo tar --extract --file=- --directory=/usr/local/bin --strip-components=1 "atuin-${ARCHITECTURE_ATUIN}-unknown-linux-gnu/atuin"
 }
 
 remove_neovim() {
@@ -85,6 +98,10 @@ main() {
 
     while (($# > 0)); do
         case "$1" in
+            atuin)
+                remove_atuin
+                install_atuin
+                ;;
             nvim)
                 remove_neovim
                 install_neovim
