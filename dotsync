@@ -54,6 +54,12 @@ run_linksync() {
 
 main() {
     get_unsynced
+
+    if ((${#UNSYNCED[@]} == 0)); then
+        echo "There are no dotfiles to sync"
+        exit
+    fi
+
     run_linksync
 }
 
