@@ -145,7 +145,7 @@ add_packages() {
 sync_inventory() {
     if (cd "$HOME/inventory" \
         && git add "inventory.yaml" \
-        && git commit --message "chore: added ${1:2} to $MACHINE $PACKAGE_MANAGER" \
+        && git commit --message "chore: add ${1:2} to $MACHINE $PACKAGE_MANAGER" \
         && git push) &>/dev/null; then
         echo "Synced $MACHINE"
     else
