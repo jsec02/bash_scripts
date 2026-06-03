@@ -6,23 +6,19 @@
 
 read -ra MACHINES <<<"$(python3 "$HOME/inventory/parser.py" machines)"
 
-sync_inventory() {
+invsync() {
     for machine in "${MACHINES[@]}"; do
         [[ "$machine" == "$HOSTNAME" ]] && continue
-        ssh "$machine" 'cd $HOME/inventory && git pull origin master'
-    done
-}
-
-sync_dotfiles() {
-    for machine in "${MACHINES[@]}"; do
-        [[ "$machine" == "$HOSTNAME" ]] && continue
-        ssh "$machine" 'cd $HOME/dotfiles && git pull origin master && cd $HOME/bash/scripts && git pull origin master && bash mksym'
+        ssh "$machine" '
+            cd $HOME/inventory && git pull origin master
+            cd $HOME/dotfiles && git pull origin master
+            cd $HOME/bash/scripts && git pull origin master && bash mksym
+        '
     done
 }
 
 main() {
-    sync_inventory
-    sync_dotfiles
+    invsync
 }
 
 main
