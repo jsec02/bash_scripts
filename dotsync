@@ -54,7 +54,6 @@ run_linksync() {
 
 main() {
     get_unsynced
-    sync_inventory
     run_linksync
 }
 
