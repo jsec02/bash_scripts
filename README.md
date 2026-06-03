@@ -25,8 +25,8 @@ SUM:                              8            138             34            503
 ```
 bash_scripts
 ├── add
-├── dotsync
 ├── getmusic
+├── linksync
 ├── mksym
 ├── port
 ├── query
