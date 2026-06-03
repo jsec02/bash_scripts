@@ -22,21 +22,6 @@ get_unsynced() {
     done < <(python3 "$HOME/inventory/parser.py" linked_tags)
 }
 
-sync_inventory() {
-    joined_unsynced=$(printf ', %s' "${UNSYNCED[@]}")
-
-    ((${#UNSYNCED[@]} > 1)) && suffix="s" || suffix=""
-
-    if (cd "$HOME/inventory" \
-        && git add . \
-        && git commit --message "chore: add ${joined_unsynced:2} module${suffix}" \
-        && git push) &>/dev/null; then
-        echo "Inventory sync completed"
-    else
-        echo "Inventory sync failed"
-    fi
-}
-
 sync_dotfiles() {
     joined_unsynced=$(printf ', %s' "${UNSYNCED[@]}")
 
