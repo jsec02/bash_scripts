@@ -145,7 +145,7 @@ add_packages() {
 sync_inventory() {
     if (cd "$HOME/inventory" \
         && git add "inventory.yaml" \
-        && git commit --message "chore: add ${1:2}" \
+        && git commit --message "chore: added ${1:2} to $MACHINE $PACKAGE_MANAGER" \
         && git push) &>/dev/null; then
         echo "Synced $MACHINE"
     else
@@ -173,18 +173,18 @@ main() {
     joined_invalid=$(printf ', %s' "${INVALID_PACKAGES[@]}")
 
     if ((${#VALID_PACKAGES[@]} == 0)); then
-        echo "Invalid packages for ${MACHINE} ${PACKAGE_MANAGER}: ${joined_invalid:2}" >&2
+        echo "Invalid packages for $MACHINE $PACKAGE_MANAGER: ${joined_invalid:2}" >&2
         exit 1
     fi
 
     add_packages
 
-    echo "Added packages to ${MACHINE} ${PACKAGE_MANAGER}: ${joined_valid:2}"
+    echo "Added packages to $MACHINE $PACKAGE_MANAGER: ${joined_valid:2}"
 
     sync_inventory "$joined_valid"
 
     if ((${#INVALID_PACKAGES[@]} > 0)); then
-        echo "Invalid packages for ${MACHINE} ${PACKAGE_MANAGER}: ${joined_invalid:2}" >&2
+        echo "Invalid packages for $MACHINE $PACKAGE_MANAGER: ${joined_invalid:2}" >&2
     fi
 
 }
