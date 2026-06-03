@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+# ================================================================================
+# =                                   DOTSYNC                                    =
+# ================================================================================
+
+read -ra MACHINES <<<"$(python3 "$HOME/inventory/parser.py" machines)"
+
+UNSYNCED=()
+
+get_unsynced() {
+    local dirs=()
+
+    for dir in "$HOME/dotfiles/"*/; do
+        dir="${dir%*/}"  # remove trailing "/"
+        dir="${dir##*/}" # remove leading path
+        dirs+=("$dir")
+    done
+
+    while read -r tag; do
+        [[ ! " ${dirs[*]} " == *" $tag "* ]] && UNSYNCED+=("$tag")
+    done < <(python3 "$HOME/inventory/parser.py" linked_tags)
+}
+
+sync_inventory() {
+    joined_unsynced=$(printf ', %s' "${UNSYNCED[@]}")
+
+    ((${#UNSYNCED[@]} > 1)) && suffix="s" || suffix=""
+
+    if (cd "$HOME/inventory" \
+        && git add . \
+        && git commit --message "chore: add ${joined_unsynced:2} module${suffix}" \
+        && git push) &>/dev/null; then
+        echo "Inventory sync completed"
+    else
+        echo "Inventory sync failed"
+    fi
+}
+
+sync_dotfiles() {
+    joined_unsynced=$(printf ', %s' "${UNSYNCED[@]}")
+
+    ((${#UNSYNCED[@]} > 1)) && suffix="s" || suffix=""
+
+    if (cd "$HOME/dotfiles" \
+        && git add . \
+        && git commit --message "chore: add ${joined_unsynced:2} config${suffix}" \
+        && git push) &>/dev/null; then
+        echo "Dotfiles sync completed"
+    else
+        echo "Dotfiles sync failed"
+    fi
+}
+
+run_linksync() {
+    (cd "$HOME/bash/scripts" && git pull origin master && bash linksync)
+
+    sync_dotfiles
+
+    for machine in "${MACHINES[@]}"; do
+        [[ "$machine" == "$HOSTNAME" ]] && continue
+        ssh "$machine" '
+            cd $HOME/inventory && git pull origin master
+            cd $HOME/dotfiles && git pull origin master
+            cd $HOME/bash/scripts && git pull origin master && bash linksync
+        '
+    done
+}
+
+main() {
+    get_unsynced
+    sync_inventory
+    run_linksync
+}
+
+main

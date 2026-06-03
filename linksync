@@ -1,76 +1,23 @@
 #!/usr/bin/env bash
 
 # ================================================================================
-# =                                   DOTSYNC                                    =
+# =                                   LINKSYNC                                   =
 # ================================================================================
 
-read -ra MACHINES <<<"$(python3 "$HOME/inventory/parser.py" machines)"
-
-UNSYNCED=()
-
-get_unsynced() {
-    local dirs=()
-
-    for dir in "$HOME/dotfiles/"*/; do
-        dir="${dir%*/}"  # remove trailing "/"
-        dir="${dir##*/}" # remove leading path
-        dirs+=("$dir")
-    done
-
-    while read -r tag; do
-        [[ ! " ${dirs[*]} " == *" $tag "* ]] && UNSYNCED+=("$tag")
-    done < <(python3 "$HOME/inventory/parser.py" linked_tags)
-}
-
-sync_inventory() {
-    joined_unsynced=$(printf ', %s' "${UNSYNCED[@]}")
-
-    ((${#UNSYNCED[@]} > 1)) && suffix="s" || suffix=""
-
-    if (cd "$HOME/inventory" \
-        && git add . \
-        && git commit --message "chore: add ${joined_unsynced:2} module${suffix}" \
-        && git push) &>/dev/null; then
-        echo "Inventory sync completed"
-    else
-        echo "Inventory sync failed"
-    fi
-}
-
-sync_dotfiles() {
-    joined_unsynced=$(printf ', %s' "${UNSYNCED[@]}")
-
-    ((${#UNSYNCED[@]} > 1)) && suffix="s" || suffix=""
-
-    if (cd "$HOME/dotfiles" \
-        && git add . \
-        && git commit --message "chore: add ${joined_unsynced:2} config${suffix}" \
-        && git push) &>/dev/null; then
-        echo "Dotfiles sync completed"
-    else
-        echo "Dotfiles sync failed"
-    fi
-}
-
-run_linksync() {
-    (cd "$HOME/bash/scripts" && git pull origin master && bash linksync)
-
-    sync_dotfiles
-
-    for machine in "${MACHINES[@]}"; do
-        [[ "$machine" == "$HOSTNAME" ]] && continue
-        ssh "$machine" '
-            cd $HOME/inventory && git pull origin master
-            cd $HOME/dotfiles && git pull origin master
-            cd $HOME/bash/scripts && git pull origin master && bash linksync
-        '
-    done
+linksync() {
+    while read -r source target sudo; do
+        local cmd=()
+        [[ -L "$target" ]] && continue                           # skip if symlink already exists
+        [[ "$sudo" == "true" ]] && cmd=(sudo)                    # add sudo to command if sudo is true
+        mkdir --parents "$(dirname "$source")"                   # ensure dotfiles destination dir exists
+        [[ -e "$target" ]] && "${cmd[@]}" mv "$target" "$source" # move existing config into dotfiles
+        "${cmd[@]}" mkdir --parents "$(dirname "$target")"       # ensure target parent dir exists
+        "${cmd[@]}" ln --symbolic --force "$source" "$target"    # create symlink from dotfiles to target
+    done < <(python3 "$HOME/inventory/parser.py" links "$HOSTNAME")
 }
 
 main() {
-    get_unsynced
-    sync_inventory
-    run_linksync
+    linksync
 }
 
 main
