@@ -10,10 +10,10 @@ Bash based personal productivity tools and workflow automation
 --------------------------------------------------------------------------------
 Language                      files          blank        comment           code
 --------------------------------------------------------------------------------
-Bourne Again Shell                7            118             30            437
+Bourne Again Shell                7            130             30            477
 Markdown                          1              8              4             26
 --------------------------------------------------------------------------------
-SUM:                              8            126             34            463
+SUM:                              8            138             34            503
 --------------------------------------------------------------------------------
 ```
 <!-- CODE_STATISTICS_END -->
@@ -25,8 +25,8 @@ SUM:                              8            126             34            463
 ```
 bash_scripts
 ├── add
+├── dotsync
 ├── getmusic
-├── invsync
 ├── mksym
 ├── port
 ├── query
