@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+# ================================================================================
+# =                                   REPOSYNC                                   =
+# ================================================================================
+
+read -ra MACHINES <<<"$(python3 "$HOME/inventory/parser.py" machines)"
+
+reposync() {
+    for machine in "${MACHINES[@]}"; do
+        [[ "$machine" == "$HOSTNAME" ]] && continue
+        ssh "$machine" '
+            cd $HOME/inventory && git pull origin master
+            cd $HOME/dotfiles && git pull origin master
+            cd $HOME/bash/scripts && git pull origin master
+        '
+    done
+}
+
+main() {
+    reposync
+}
+
+main
