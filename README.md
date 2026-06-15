@@ -11,9 +11,9 @@ Bash based personal productivity tools and workflow automation
 Language                      files          blank        comment           code
 --------------------------------------------------------------------------------
 Bourne Again Shell                9            149             36            530
-Markdown                          1              8              4             27
+Markdown                          1              8              4             28
 --------------------------------------------------------------------------------
-SUM:                             10            157             40            557
+SUM:                             10            157             40            558
 --------------------------------------------------------------------------------
 ```
 <!-- CODE_STATISTICS_END -->
