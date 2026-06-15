@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+# ================================================================================
+# =                                    NMAPZ                                     =
+# ================================================================================
+
+set -eou pipefail
+
+NAME=${0##*/}
+
+TARGET=""
+PORTS=""
+
+usage() {
+    echo "Usage: $NAME <target>"
+}
+
+parse_args() {
+    if (("$#" != 1)); then
+        usage >&2
+        exit 1
+    fi
+
+    case "$1" in
+        -h | --help)
+            usage
+            exit
+            ;;
+        *)
+            TARGET="$1"
+            ;;
+    esac
+}
+
+nmap_all_tcp_ports() {
+    echo "Running full TCP port scan..."
+
+    sudo nmap -p- -T4 -oN all_tcp_ports.nmap "$TARGET"
+}
+
+extract_ports() {
+    PORTS=$(cat all_tcp_ports.nmap \
+        | grep '^[0-9]' \
+        | cut --delimiter='/' --fields=1 \
+        | tr '\n' ',' \
+        | sed 's/,$//')
+
+    echo "Ports found: $PORTS"
+}
+
+nmap_default_and_version_tcp_scripts() {
+    echo "Running default and version scripts on ports..."
+
+    sudo nmap -sC -sV -p "$PORTS" -T4 -oN default_and_version_tcp_scripts.nmap "$TARGET"
+}
+
+main() {
+    parse_args "$@"
+    nmap_all_tcp_ports
+    extract_ports
+    nmap_default_and_version_tcp_scripts
+}
+
+main "$@"
