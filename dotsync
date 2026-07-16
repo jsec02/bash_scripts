@@ -4,7 +4,7 @@
 # =                                   DOTSYNC                                    =
 # ================================================================================
 
-read -ra MACHINES <<<"$(python3 "$HOME/inventory/parser.py" machines)"
+read -ra MACHINES <<<"$(python3 "$HOME/parsers/inventory.py" machines)"
 
 UNSYNCED=()
 
@@ -19,7 +19,7 @@ get_unsynced() {
 
     while read -r tag; do
         [[ ! " ${dirs[*]} " == *" $tag "* ]] && UNSYNCED+=("$tag")
-    done < <(python3 "$HOME/inventory/parser.py" linked_tags)
+    done < <(python3 "$HOME/parsers/inventory.py" linked_tags)
 }
 
 sync_dotfiles() {
@@ -45,6 +45,7 @@ run_linksync() {
     for machine in "${MACHINES[@]}"; do
         [[ "$machine" == "$HOSTNAME" ]] && continue
         ssh "$machine" '
+            cd $HOME/parsers && git pull origin master
             cd $HOME/inventory && git pull origin master
             cd $HOME/dotfiles && git pull origin master
             cd $HOME/bash/scripts && git pull origin master && bash linksync
