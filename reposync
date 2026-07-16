@@ -10,6 +10,7 @@ reposync() {
     for machine in "${MACHINES[@]}"; do
         [[ "$machine" == "$HOSTNAME" ]] && continue
         ssh "$machine" '
+            cd $HOME/parsers && git pull origin master
             cd $HOME/inventory && git pull origin master
             cd $HOME/dotfiles && git pull origin master
             cd $HOME/bash/scripts && git pull origin master
