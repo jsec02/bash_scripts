@@ -13,7 +13,7 @@ linksync() {
         [[ -e "$target" ]] && "${cmd[@]}" mv "$target" "$source" # move existing config into dotfiles
         "${cmd[@]}" mkdir --parents "$(dirname "$target")"       # ensure target parent dir exists
         "${cmd[@]}" ln --symbolic --force "$source" "$target"    # create symlink from dotfiles to target
-    done < <(python3 "$HOME/inventory/parser.py" links "$HOSTNAME")
+    done < <(python3 "$HOME/parsers/inventory.py" links "$HOSTNAME")
 }
 
 main() {
