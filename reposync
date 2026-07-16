@@ -4,7 +4,7 @@
 # =                                   REPOSYNC                                   =
 # ================================================================================
 
-read -ra MACHINES <<<"$(python3 "$HOME/inventory/parser.py" machines)"
+read -ra MACHINES <<<"$(python3 "$HOME/parsers/inventory.py" machines)"
 
 reposync() {
     for machine in "${MACHINES[@]}"; do
