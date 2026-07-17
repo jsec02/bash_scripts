@@ -14,6 +14,7 @@ reposync() {
             cd $HOME/inventory && git pull origin master
             cd $HOME/dotfiles && git pull origin master
             cd $HOME/bash/scripts && git pull origin master
+            cd $HOME/bash/backup && git pull origin master
         '
     done
 }
