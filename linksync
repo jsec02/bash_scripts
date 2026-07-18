@@ -7,12 +7,12 @@
 linksync() {
     while read -r source target sudo; do
         local cmd=()
-        [[ -L "$target" ]] && continue                           # skip if symlink already exists
-        [[ "$sudo" == "true" ]] && cmd=(sudo)                    # add sudo to command if sudo is true
-        mkdir --parents "$(dirname "$source")"                   # ensure dotfiles destination dir exists
-        [[ -e "$target" ]] && "${cmd[@]}" mv "$target" "$source" # move existing config into dotfiles
-        "${cmd[@]}" mkdir --parents "$(dirname "$target")"       # ensure target parent dir exists
-        "${cmd[@]}" ln --symbolic --force "$source" "$target"    # create symlink from dotfiles to target
+        [[ -L "$target" ]] && continue                           # Skip if symlink already exists
+        [[ "$sudo" == "true" ]] && cmd=(sudo)                    # Add sudo to command if sudo is true
+        mkdir --parents "$(dirname "$source")"                   # Ensure dotfiles destination dir exists
+        [[ -e "$target" ]] && "${cmd[@]}" mv "$target" "$source" # Move existing config into dotfiles
+        "${cmd[@]}" mkdir --parents "$(dirname "$target")"       # Ensure target parent dir exists
+        "${cmd[@]}" ln --symbolic --force "$source" "$target"    # Create symlink from dotfiles to target
     done < <(python3 "$HOME/parsers/inventory.py" links "$HOSTNAME")
 }
 
