@@ -5,7 +5,7 @@
 # ================================================================================
 
 linksync() {
-    while read -r source target sudo; do
+    while read -r sudo source target; do
         local cmd=()
         [[ -L "$target" ]] && continue                           # Skip if symlink already exists
         [[ "$sudo" == "true" ]] && cmd=(sudo)                    # Add sudo to command if sudo is true
