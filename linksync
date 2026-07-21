@@ -11,8 +11,8 @@ linksync() {
         [[ "$sudo" == "true" ]] && cmd=(sudo)  # Add sudo to command if sudo is true
         mkdir --parents "$(dirname "$source")" # Ensure dotfiles destination dir exists
 
-        if [[ -e "$source" && -e "$target" ]]; then
-            "${cmd[@]}" rm "$target" # Remove default config
+        if [[ -e "$source" && -e "$target" ]]; then # Fresh-install case where configs may exist already
+            "${cmd[@]}" rm "$target"                # Remove default config
         elif [[ -e "$target" ]]; then
             "${cmd[@]}" mv "$target" "$source" # Move existing config into dotfiles
         fi
