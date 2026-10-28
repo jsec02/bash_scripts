@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+# ================================================================================
+# =                                  PORTPARSE                                   =
+# ================================================================================
+
+# Parses /proc/net/{tcp,tcp6,udp,udp6} and displays human readable format
+# Used when netstat and ss is not available
+
+set -eou pipefail
+
+NAME=${0##*/}
+
+FILE=
+
+usage() {
+    echo "Usage: $NAME <file> [-h|--help]"
+}
+
+parse_args() {
+    if (($# != 1)); then
+        usage >&2
+        exit 1
+    fi
+
+    case $1 in
+        -h | --help)
+            usage
+            exit
+            ;;
+        *)
+            FILE="$1"
+            ;;
+    esac
+
+    if [[ ! -f $FILE ]]; then
+        echo "File not found: $FILE" >&2
+        exit 1
+    fi
+}
+
+convert_hexadecimal_to_ipv4() {
+    local hexadecimal=$1
+
+    # Take hexadecimal and convert it to decimal with printf
+    # IPv4 addresses are written using 4 decimal numbers separated by dots
+    # Convert from little-endian hexadecimal to big-endian decimal
+    printf "%d.%d.%d.%d" "0x${hexadecimal:6:2}" "0x${hexadecimal:4:2}" "0x${hexadecimal:2:2}" "0x${hexadecimal:0:2}"
+}
+
+convert_hexadecimal_to_port() {
+    local hexadecimal=$1
+
+    # Take hexadecimal and convert it to decimal with printf
+    printf "%d" "0x$hexadecimal"
+}
+
+parse_file() {
+    echo "Local Address:Port Remote Address:Port"
+
+    # Pipe into read instead of redirection because we need to do work on $FILE first
+    # We need nested reads here because the format of these files use both spaces and colons
+    tail -n +2 "$FILE" | while IFS=' ' read -r _ local_hexadecimal_socket remote_hexadecimal_socket _; do
+        IFS=':' read -r local_hexadecimal_address local_hexadecimal_port <<<"$local_hexadecimal_socket"
+        IFS=':' read -r remote_hexadecimal_address remote_hexadecimal_port <<<"$remote_hexadecimal_socket"
+
+        local_address=$(convert_hexadecimal_to_ipv4 "$local_hexadecimal_address")
+        local_port=$(convert_hexadecimal_to_port "$local_hexadecimal_port")
+
+        remote_address=$(convert_hexadecimal_to_ipv4 "$remote_hexadecimal_address")
+        remote_port=$(convert_hexadecimal_to_port "$remote_hexadecimal_port")
+
+        echo "$local_address:$local_port $remote_address:$remote_port"
+    done
+}
+
+main() {
+    parse_args "$@"
+    parse_file
+}
+
+main "$@"
