@@ -44,7 +44,7 @@ grep_services() {
         exit 1
     fi
 
-    grep --color=auto --extended-regexp "$PATTERN" "$scriptdb" \
+    grep --color=auto --extended-regexp --ignore-case "$PATTERN" "$scriptdb" \
         || echo "No scritps found" >&2
 }
 
