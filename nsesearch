@@ -46,14 +46,14 @@ grep_scripts() {
 
     result=$(cat "$scriptdb")
     for word in "${WORDS[@]}"; do
-        result=$(grep --color=never -- "$word" <<<"$result") || {
+        result=$(grep --color=never --ignore-case -- "$word" <<<"$result") || {
             echo "No scripts found" >&2
             exit 1
         }
     done
 
     # re-grep once more at the end just for color highlighting
-    grep --color=auto --extended-regexp -- "$PATTERN" <<<"$result"
+    grep --color=auto --ignore-case --extended-regexp -- "$PATTERN" <<<"$result"
 }
 
 main() {
