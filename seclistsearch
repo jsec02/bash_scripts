@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+# ================================================================================
+# =                                SECLISTSEARCH                                 =
+# ================================================================================
+
+set -eou pipefail
+
+NAME=${0##*/}
+
+WORDS=()
+
+usage() {
+    echo "Usage: $NAME [words...]"
+}
+
+parse_args() {
+    if (($# == 0)); then
+        usage >&2
+        exit 1
+    fi
+
+    while (($# > 0)); do
+        WORDS+=("$1")
+        shift
+    done
+
+}
+
+build_pattern() {
+    PATTERN=$(
+        IFS="|"
+        echo "${WORDS[*]}"
+    )
+}
+
+grep_files() {
+    local seclists
+
+    if [[ -e "/usr/share/seclists" ]]; then
+        seclists="/usr/share/seclists"
+    else
+        echo "seclists directory not found" >&2
+        exit 1
+    fi
+
+    result=$(find "$seclists" -type f)
+    for word in "${WORDS[@]}"; do
+        result=$(grep --color=never --ignore-case -- "$word" <<<"$result") || {
+            echo "No files found" >&2
+            exit 1
+        }
+    done
+
+    # re-grep once more at the end just for color highlighting
+    grep --color=auto --ignore-case --extended-regexp -- "$PATTERN" <<<"$result"
+}
+
+main() {
+    parse_args "$@"
+    build_pattern
+    grep_files
+}
+
+main "$@"
