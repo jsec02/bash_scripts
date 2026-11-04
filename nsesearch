@@ -34,8 +34,8 @@ build_pattern() {
     )
 }
 
-grep_services() {
-    local scriptdb
+grep_scripts() {
+    local scriptdb result word
 
     if [[ -e "/usr/share/nmap/scripts/script.db" ]]; then
         scriptdb="/usr/share/nmap/scripts/script.db"
@@ -44,14 +44,22 @@ grep_services() {
         exit 1
     fi
 
-    grep --color=auto --extended-regexp --ignore-case "$PATTERN" "$scriptdb" \
-        || echo "No scritps found" >&2
+    result=$(cat "$scriptdb")
+    for word in "${WORDS[@]}"; do
+        result=$(grep --color=never -- "$word" <<<"$result") || {
+            echo "No scripts found" >&2
+            exit 1
+        }
+    done
+
+    # re-grep once more at the end just for color highlighting
+    grep --color=auto --extended-regexp -- "$PATTERN" <<<"$result"
 }
 
 main() {
     parse_args "$@"
     build_pattern
-    grep_services
+    grep_scripts
 }
 
 main "$@"
