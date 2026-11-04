@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+# ================================================================================
+# =                                  NSESEARCH                                   =
+# ================================================================================
+
+set -eou pipefail
+
+NAME=${0##*/}
+
+WORDS=()
+
+usage() {
+    echo "Usage: $NAME [words...]"
+}
+
+parse_args() {
+    if (($# == 0)); then
+        usage >&2
+        exit 1
+    fi
+
+    while (($# > 0)); do
+        WORDS+=("$1")
+        shift
+    done
+
+}
+
+build_pattern() {
+    PATTERN=$(
+        IFS="|"
+        echo "${WORDS[*]}"
+    )
+}
+
+grep_services() {
+    local scriptdb
+
+    if [[ -e "/usr/share/nmap/scripts/script.db" ]]; then
+        scriptdb="/usr/share/nmap/scripts/script.db"
+    else
+        echo "script.db file not found" >&2
+        exit 1
+    fi
+
+    grep --color=auto --extended-regexp "$PATTERN" "$scriptdb" \
+        || echo "No scritps found" >&2
+}
+
+main() {
+    parse_args "$@"
+    build_pattern
+    grep_services
+}
+
+main "$@"
